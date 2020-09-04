@@ -1,64 +1,83 @@
 module ShowTuple
 ( TProxy(..)
-, class ShowTupleType
-, showTupleType
+, class ToArrayString
+, toArrayString
 , TupleView(..)
 ) where
 
 import Prelude -- (Unit, (<>))
 
 import Data.Tuple
-
+import Data.Array
+import Data.Foldable (intercalate)
 import Data.Tuple.Nested (type (/\), (/\))
 import Prim.Boolean (kind Boolean, True, False)
 import Prim.TypeError (class Fail, Text)
 
+class ToArrayString t
+  where
+  toArrayString :: t -> Array String
+
+instance toArrayStringUnit :: ToArrayString (TProxy Unit)
+  where
+  toArrayString _ = [ "Unit" ]
+else instance toArrayStringInt ::
+  ( ToArrayString (TProxy y)
+  ) => ToArrayString (TProxy (Int/\y))
+  where
+  toArrayString _ = "Int" : (toArrayString (TProxy :: TProxy y))
+else instance toArrayStringNumber ::
+  ( ToArrayString (TProxy y)
+  ) => ToArrayString (TProxy (Number/\y))
+  where
+  toArrayString _ = "Number" : (toArrayString (TProxy :: TProxy y))
+else instance toArrayStringString ::
+  ( ToArrayString (TProxy y)
+  ) => ToArrayString (TProxy (String/\y))
+  where
+  toArrayString _ = "String" : (toArrayString (TProxy :: TProxy y))
+else instance toArrayStringUnknown ::
+  ( ToArrayString (TProxy y)
+  ) => ToArrayString (TProxy (x/\y))
+  where
+  toArrayString _ = "Unknown" : (toArrayString (TProxy :: TProxy y))
+
+
 data TProxy tupleType = TProxy
 
-class ShowTupleType tupleType
+instance showTProxy :: 
+  ( ToArrayString (TProxy tupleType)
+  ) => Show (TProxy tupleType)
   where
-  showTupleType :: TProxy tupleType -> String
-
-instance showTupleUnit :: ShowTupleType Unit
-  where
-  showTupleType _ = "Unit"
-else instance showTupleConsInt ::
-  ( ShowTupleType y
-  ) => ShowTupleType (Int/\y)
-  where
-  showTupleType _ = "Int /\\ " <> (showTupleType (TProxy :: TProxy y))
-else instance showTupleConsNumber ::
-  ( ShowTupleType y
-  ) => ShowTupleType (Number/\y)
-  where
-  showTupleType _ = "Number /\\ " <> (showTupleType (TProxy :: TProxy y))
-else instance showTupleConsString ::
-  ( ShowTupleType y
-  ) => ShowTupleType (String/\y)
-  where
-  showTupleType _ = "String /\\ " <> (showTupleType (TProxy :: TProxy y))
-else instance showTupleConsOther ::
-  ( ShowTupleType y
-  ) => ShowTupleType (x/\y)
-  where
-  showTupleType _ = "Unknown" <> (showTupleType (TProxy :: TProxy y))
+    show _ = "(" 
+          <> intercalate "," array'
+          <> ")"
+      where 
+        array' = take ((length array)-1) array
+        array = toArrayString (TProxy :: TProxy tupleType)
 
 
 newtype TupleView a b = TupleView (Tuple a b)
 
-instance showTuple1 :: 
+instance toArrayTupleViewUnit ::
   ( Show a
-  ) => Show (TupleView a Unit)
+  ) => ToArrayString (TupleView a Unit)
+  where
+    toArrayString (TupleView t) = [show $ fst t]
+else instance toArrayTupleViewMore ::
+  ( Show a
+  , ToArrayString (TupleView x y)
+  ) => ToArrayString (TupleView a (Tuple x y))
+  where
+    toArrayString (TupleView (Tuple z w)) = (show z) : (toArrayString (TupleView w))
+
+instance showTuple ::
+  ( ToArrayString (TupleView a b) 
+  ) => Show (TupleView a b)
   where 
-    show (TupleView t) = (show $ fst t) <> " /\\ unit"
-else instance showTupleMore ::
-  ( Show a
-  , Show (TupleView x y)
-  ) => Show (TupleView a (Tuple x y))
-  where
-    show (TupleView (Tuple z w)) = (show z) <> " /\\ " <> (show (TupleView w))
-else instance showTupleOther :: 
-  ( Fail (Text "i don't know how to show")
-  ) => Show (TupleView any any')
-  where
-    show _ = "Unknown"
+    show tuple = "(" 
+                <> intercalate "," array
+                <> ")"
+      where 
+        array = toArrayString tuple
+
