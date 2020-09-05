@@ -46,4 +46,9 @@ Result
 ```
 
 
+# Reference
+
+To reverse tuple on TypeScript. (Japanese)
+https://qiita.com/cuttlefish_math/items/792c911794a5a1bb304b
+
 
