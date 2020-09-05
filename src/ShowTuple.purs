@@ -5,14 +5,12 @@ module ShowTuple
 , TupleView(..)
 ) where
 
-import Prelude -- (Unit, (<>))
+import Prelude (class Show, Unit, show, ($), (-), (<>))
 
-import Data.Tuple
-import Data.Array
+import Data.Tuple (Tuple(..), fst)
+import Data.Array (length, take, (:))
 import Data.Foldable (intercalate)
-import Data.Tuple.Nested (type (/\), (/\))
-import Prim.Boolean (kind Boolean, True, False)
-import Prim.TypeError (class Fail, Text)
+import Data.Tuple.Nested (type (/\))
 
 class ToArrayString t
   where
