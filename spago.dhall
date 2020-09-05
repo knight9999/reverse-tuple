@@ -9,6 +9,7 @@ You can edit this file as you like.
   , "effect"
   , "proxy"
   , "psci-support"
+  , "test-unit"
   , "tuples"
   , "unsafe-coerce"
   ]

@@ -8,24 +8,21 @@ import Data.Tuple (Tuple)
 import Data.Tuple.Nested (type (/\), (/\))
 
 import ShowTuple (TProxy(..), TupleView(..))
-import ReverseTuple (class GoThrough, class Reverse)
+import ReverseTuple (class Reverse)
 
 main :: Effect Unit
 main = do
-  log "--- Type Go Through ---"
-  log $ show (TProxy :: forall m. (GoThrough (Int /\ String /\ Number /\ Unit) m) => TProxy m)
+  log "--- Tuple (Int,String,Number) ---"
+  log $ show (TProxy :: TProxy (Int /\ String /\ Number /\ Unit))
 
-  log "--- Type Reverse ---"
+  log "--- Reverse Tuple (Int,String,Number) ==> Tuple (Number,String,Int) ---"
   log $ show (TProxy :: forall m. (Reverse (Int /\ String /\ Number /\ Unit) m) => TProxy m)
 
-  log "--- Type Normal ---"
-  log $ show (TProxy :: TProxy (Number /\ String /\ Int /\ Unit))
-
-  log "--- Value ---"
+  log "--- Value (3.14,\"ABC\",10) ---"
   let tuple3 = (3.14 /\ "ABC" /\ 10 /\ unit) 
   log $ show $ TupleView tuple3
 
-  log "--- Value Type Gaurd ---"
+  log "--- Value (3.14,\"ABC\",10) guarded by Reverse Tuple (Int,String,Number) ---"
   let tuple4 = (identity :: forall m. (Reverse (Int /\ String /\ Number /\ Unit) m) => m -> m)
                $ 3.14 /\ "ABC" /\ 10 /\ unit
   log $ show $ TupleView tuple4

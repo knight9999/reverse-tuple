@@ -12,6 +12,8 @@ import Data.Array (length, take, (:))
 import Data.Foldable (intercalate)
 import Data.Tuple.Nested (type (/\))
 
+data TProxy tupleType = TProxy
+
 class ToArrayString t
   where
   toArrayString :: t -> Array String
@@ -39,9 +41,6 @@ else instance toArrayStringUnknown ::
   ) => ToArrayString (TProxy (x/\y))
   where
   toArrayString _ = "Unknown" : (toArrayString (TProxy :: TProxy y))
-
-
-data TProxy tupleType = TProxy
 
 instance showTProxy :: 
   ( ToArrayString (TProxy tupleType)
